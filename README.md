@@ -42,7 +42,7 @@ APP_NAME=ControlCash
 APP_KEY=
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://tu-servicio.onrender.com
+APP_URL=https://controlcash.itcontinental.com
 APP_LOCALE=es
 APP_FALLBACK_LOCALE=en
 APP_FAKER_LOCALE=es_ES
@@ -56,7 +56,7 @@ VITE_APP_NAME=ControlCash
 VITE_APP_LOCALE=es
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-GOOGLE_REDIRECT_URI=https://tu-servicio.onrender.com/auth/google/callback
+GOOGLE_REDIRECT_URI=https://controlcash.itcontinental.com/auth/google/callback
 ```
 
 Genera `APP_KEY` localmente con `php artisan key:generate --show` y pega el valor en Render.
