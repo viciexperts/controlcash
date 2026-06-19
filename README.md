@@ -25,6 +25,48 @@ npm run dev
 
 La base de datos SQLite vive en `database/database.sqlite`.
 
+## Deploy en Render con Docker
+
+Usa estos valores:
+
+```txt
+Language: Docker
+Root Directory: vacio
+Dockerfile Path: ./Dockerfile
+```
+
+Variables recomendadas en Render:
+
+```env
+APP_NAME=ControlCash
+APP_KEY=
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://tu-servicio.onrender.com
+APP_LOCALE=es
+APP_FALLBACK_LOCALE=en
+APP_FAKER_LOCALE=es_ES
+LOG_CHANNEL=stderr
+DB_CONNECTION=sqlite
+DB_DATABASE=/var/www/html/storage/database.sqlite
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+VITE_APP_NAME=ControlCash
+VITE_APP_LOCALE=es
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=https://tu-servicio.onrender.com/auth/google/callback
+```
+
+Genera `APP_KEY` localmente con `php artisan key:generate --show` y pega el valor en Render.
+
+Para conservar SQLite entre deploys, agrega un persistent disk en Render montado en:
+
+```txt
+/var/www/html/storage
+```
+
 ## Google OAuth
 
 Configura estas variables en `.env`:
