@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\ExpenseGroup;
 use App\Models\User;
+use App\Notifications\GroupExpenseCreated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -15,6 +17,8 @@ class ExpenseTest extends TestCase
 
     public function test_group_expenses_are_visible_to_group_members(): void
     {
+        Notification::fake();
+
         $owner = User::factory()->create();
         $member = User::factory()->create();
         $category = Category::create([
@@ -47,6 +51,9 @@ class ExpenseTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertRedirect();
 
+        Notification::assertSentTo($member, GroupExpenseCreated::class);
+        Notification::assertNotSentTo($owner, GroupExpenseCreated::class);
+
         $this
             ->actingAs($member)
             ->get('/expenses')
@@ -61,6 +68,8 @@ class ExpenseTest extends TestCase
 
     public function test_expense_workflow_supports_recurrence_comments_approval_and_csv_export(): void
     {
+        Notification::fake();
+
         $owner = User::factory()->create();
         $member = User::factory()->create();
         $group = ExpenseGroup::create([

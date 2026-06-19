@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Expense;
 use App\Models\ExpenseComment;
 use App\Models\ExpenseGroup;
+use App\Notifications\GroupExpenseCreated;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -47,14 +48,18 @@ class ExpenseController extends Controller
         $data = $this->validatedData($request);
         $receipt = $this->storeReceipt($request);
 
-        DB::transaction(function () use ($request, $data, $receipt) {
+        $expense = DB::transaction(function () use ($request, $data, $receipt) {
             $expense = $this->createExpense($request, $data, $receipt);
             $this->syncSplits($expense, $data);
 
             if (! empty($data['is_recurring'])) {
                 $this->createRecurringExpenses($request, $expense, $data);
             }
+
+            return $expense;
         });
+
+        $this->notifyGroupMembers($expense, $request);
 
         return back();
     }
@@ -250,6 +255,20 @@ class ExpenseController extends Controller
             'path' => $file->store('receipts', 'public'),
             'name' => $file->getClientOriginalName(),
         ];
+    }
+
+    private function notifyGroupMembers(Expense $expense, Request $request): void
+    {
+        if (empty($expense->group_id)) {
+            return;
+        }
+
+        $expense->loadMissing(['group.members', 'owner', 'payer', 'category']);
+
+        $expense->group
+            ->members
+            ->reject(fn ($member) => $member->id === $request->user()->id)
+            ->each(fn ($member) => $member->notify(new GroupExpenseCreated($expense)));
     }
 
     private function syncSplits(Expense $expense, array $data): void
