@@ -131,6 +131,29 @@ GOOGLE_REDIRECT_URI="${APP_URL}/auth/google/callback"
 
 En Google Cloud, el redirect URI debe coincidir con el valor final de `GOOGLE_REDIRECT_URI`.
 
+## Probar email sin Shell en Render
+
+Configura un token largo y privado en Render:
+
+```env
+TEST_EMAIL_TOKEN=un_token_largo_y_privado
+TEST_EMAIL_TO=tu_correo@dominio.com
+```
+
+Luego abre esta URL en el navegador, cambiando el token:
+
+```txt
+https://controlcash.itcontinental.com/ops/test-email?token=un_token_largo_y_privado
+```
+
+Tambien puedes enviar a otro destinatario temporal:
+
+```txt
+https://controlcash.itcontinental.com/ops/test-email?token=un_token_largo_y_privado&to=otro@dominio.com
+```
+
+Si `TEST_EMAIL_TOKEN` no existe, la ruta devuelve 404. Si el token no coincide, devuelve 403.
+
 ## Verificacion
 
 ```bash

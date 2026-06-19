@@ -41,4 +41,9 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'test_email' => [
+        'token' => env('TEST_EMAIL_TOKEN'),
+        'to' => env('TEST_EMAIL_TO'),
+    ],
+
 ];
