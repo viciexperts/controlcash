@@ -51,8 +51,8 @@ const money = (value) =>
                     <p class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{{ money(summary.group_month) }}</p>
                 </div>
                 <div class="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900">
-                    <p class="text-sm text-slate-500">Categorias activas</p>
-                    <p class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{{ summary.categories_count }}</p>
+                    <p class="text-sm text-slate-500">Gastos personales</p>
+                    <p class="mt-2 text-2xl font-bold text-slate-900 dark:text-white">{{ money(summary.personal_month) }}</p>
                 </div>
             </div>
 

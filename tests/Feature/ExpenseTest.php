@@ -226,4 +226,47 @@ class ExpenseTest extends TestCase
                 ->where('recentExpenses.0.group', null)
             );
     }
+
+    public function test_pending_group_expenses_are_counted_on_dashboard_summary(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $group = ExpenseGroup::create([
+            'created_by' => $owner->id,
+            'name' => 'Viaje',
+        ]);
+        $group->members()->attach([
+            $owner->id => ['role' => 'admin', 'status' => 'active', 'joined_at' => now()],
+            $member->id => ['role' => 'member', 'status' => 'active', 'joined_at' => now()],
+        ]);
+
+        $this
+            ->actingAs($owner)
+            ->post('/expenses', [
+                'description' => 'Airbnb',
+                'amount' => 8216.40,
+                'expense_date' => now()->toDateString(),
+                'group_id' => $group->id,
+                'paid_by_user_id' => $owner->id,
+                'split_type' => 'equal',
+                'participant_ids' => [$owner->id, $member->id],
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
+        $expense = $group->expenses()->firstOrFail();
+        $this->assertSame('pending', $expense->approval_status);
+
+        $this
+            ->actingAs($member)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('summary.group_month', 8216.40)
+                ->where('summary.month', 8216.40)
+                ->missing('summary.categories_count')
+            );
+    }
 }

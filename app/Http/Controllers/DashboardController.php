@@ -20,7 +20,6 @@ class DashboardController extends Controller
                 $query->where('user_id', $user->id)
                     ->orWhereHas('group.members', fn ($members) => $members->where('users.id', $user->id));
             })
-            ->where(fn ($query) => $query->whereNull('group_id')->orWhere('approval_status', 'approved'))
             ->latest('expense_date')
             ->latest()
             ->get();
@@ -35,7 +34,6 @@ class DashboardController extends Controller
                 'month' => round($monthlyExpenses->sum('amount'), 2),
                 'personal_month' => round($monthlyExpenses->whereNull('group_id')->sum('amount'), 2),
                 'group_month' => round($monthlyExpenses->whereNotNull('group_id')->sum('amount'), 2),
-                'categories_count' => $user->categories()->where('is_active', true)->count(),
                 'groups_count' => $user->groups()->count(),
             ],
             'byCategory' => $monthlyExpenses
