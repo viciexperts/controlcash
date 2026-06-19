@@ -20,6 +20,7 @@ class DashboardController extends Controller
                 $query->where('user_id', $user->id)
                     ->orWhereHas('group.members', fn ($members) => $members->where('users.id', $user->id));
             })
+            ->where(fn ($query) => $query->whereNull('group_id')->orWhere('approval_status', 'approved'))
             ->latest('expense_date')
             ->latest()
             ->get();

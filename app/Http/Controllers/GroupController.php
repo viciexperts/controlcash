@@ -51,7 +51,9 @@ class GroupController extends Controller
             'members:id,name,email,avatar',
             'expenses.category',
             'expenses.payer:id,name,email',
+            'expenses.approver:id,name,email',
             'expenses.splits.user:id,name,email',
+            'expenses.comments.user:id,name,email',
             'settlements.fromUser:id,name,email',
             'settlements.toUser:id,name,email',
         ]);
@@ -59,6 +61,10 @@ class GroupController extends Controller
         return Inertia::render('Groups/Show', [
             'group' => $group,
             'balances' => GroupBalances::calculate($group),
+            'isAdmin' => $group->members()
+                ->where('users.id', $request->user()->id)
+                ->wherePivot('role', 'admin')
+                ->exists(),
             'users' => User::query()->orderBy('name')->get(['id', 'name', 'email']),
         ]);
     }

@@ -18,7 +18,7 @@ class GroupBalances
 
         $group->loadMissing(['expenses.splits', 'settlements']);
 
-        foreach ($group->expenses as $expense) {
+        foreach ($group->expenses->where('approval_status', 'approved') as $expense) {
             $payerId = $expense->paid_by_user_id;
 
             if (isset($balances[$payerId])) {

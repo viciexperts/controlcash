@@ -23,6 +23,9 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('categories', CategoryController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::resource('expenses', ExpenseController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::get('/expenses/export/{format}', [ExpenseController::class, 'export'])->name('expenses.export');
+    Route::post('/expenses/{expense}/comments', [ExpenseController::class, 'comment'])->name('expenses.comments.store');
+    Route::post('/expenses/{expense}/approve', [ExpenseController::class, 'approve'])->name('expenses.approve');
     Route::resource('groups', GroupController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
     Route::post('/groups/{group}/members', [GroupController::class, 'addMember'])->name('groups.members.store');
     Route::delete('/groups/{group}/members/{user}', [GroupController::class, 'removeMember'])->name('groups.members.destroy');

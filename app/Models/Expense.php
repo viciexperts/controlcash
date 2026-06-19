@@ -20,6 +20,14 @@ class Expense extends Model
         'description',
         'expense_date',
         'notes',
+        'receipt_path',
+        'receipt_original_name',
+        'is_recurring',
+        'recurring_day',
+        'recurrence_parent_id',
+        'approval_status',
+        'approved_by',
+        'approved_at',
     ];
 
     protected function casts(): array
@@ -27,6 +35,8 @@ class Expense extends Model
         return [
             'amount' => 'decimal:2',
             'expense_date' => 'date',
+            'is_recurring' => 'boolean',
+            'approved_at' => 'datetime',
         ];
     }
 
@@ -50,8 +60,23 @@ class Expense extends Model
         return $this->belongsTo(User::class, 'paid_by_user_id');
     }
 
+    public function approver(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function recurrenceParent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'recurrence_parent_id');
+    }
+
     public function splits(): HasMany
     {
         return $this->hasMany(ExpenseSplit::class);
+    }
+
+    public function comments(): HasMany
+    {
+        return $this->hasMany(ExpenseComment::class);
     }
 }

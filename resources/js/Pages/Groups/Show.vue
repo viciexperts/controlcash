@@ -5,6 +5,7 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 const props = defineProps({
     group: Object,
     balances: Object,
+    isAdmin: Boolean,
     users: Array,
 });
 
@@ -42,6 +43,24 @@ const settle = () => {
         onSuccess: () => settlementForm.reset('from_user_id', 'to_user_id', 'amount', 'notes'),
     });
 };
+
+const approveExpense = (expense) => {
+    router.post(route('expenses.approve', expense.id), {}, {
+        preserveScroll: true,
+    });
+};
+
+const statusLabel = (status) => ({
+    approved: 'Aprobado',
+    pending: 'Pendiente',
+    rejected: 'Rechazado',
+}[status] || status);
+
+const statusClass = (status) => ({
+    approved: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+    pending: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
+    rejected: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
+}[status] || 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300');
 </script>
 
 <template>
@@ -124,13 +143,26 @@ const settle = () => {
                 <section class="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900 lg:col-span-2">
                     <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Gastos del grupo</h2>
                     <div class="mt-4 overflow-hidden rounded-lg border border-slate-200 dark:border-slate-800">
-                        <div v-for="expense in group.expenses" :key="expense.id" class="grid gap-2 border-b border-slate-100 p-4 last:border-0 dark:border-slate-800 sm:grid-cols-4">
+                        <div v-for="expense in group.expenses" :key="expense.id" class="grid gap-2 border-b border-slate-100 p-4 last:border-0 dark:border-slate-800 sm:grid-cols-5">
                             <div class="sm:col-span-2">
-                                <p class="font-medium text-slate-900 dark:text-white">{{ expense.description }}</p>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <p class="font-medium text-slate-900 dark:text-white">{{ expense.description }}</p>
+                                    <span class="rounded-full px-2 py-0.5 text-xs font-semibold" :class="statusClass(expense.approval_status)">
+                                        {{ statusLabel(expense.approval_status) }}
+                                    </span>
+                                </div>
                                 <p class="text-sm text-slate-500">{{ expense.category?.name || 'Sin categoria' }}</p>
+                                <a v-if="expense.receipt_path" :href="`/storage/${expense.receipt_path}`" target="_blank" class="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                                    Ver recibo
+                                </a>
                             </div>
                             <p class="text-sm text-slate-500">Pago {{ expense.payer?.name }}</p>
                             <p class="font-semibold text-slate-900 dark:text-white sm:text-right">{{ money(expense.amount) }}</p>
+                            <div class="text-right">
+                                <button v-if="isAdmin && expense.approval_status === 'pending'" @click="approveExpense(expense)" class="rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">
+                                    Aprobar
+                                </button>
+                            </div>
                         </div>
                         <p v-if="!group.expenses.length" class="p-4 text-sm text-slate-500">
                             Agrega gastos desde la pantalla de gastos seleccionando este grupo.
