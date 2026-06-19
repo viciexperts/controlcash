@@ -128,4 +128,68 @@ class ExpenseTest extends TestCase
 
         $this->assertStringContainsString('Internet', $response->streamedContent());
     }
+
+    public function test_deleted_groups_keep_their_expenses_visible_without_group_name(): void
+    {
+        Notification::fake();
+
+        $owner = User::factory()->create();
+        $member = User::factory()->create();
+        $group = ExpenseGroup::create([
+            'created_by' => $owner->id,
+            'name' => 'Viaje',
+        ]);
+        $group->members()->attach([
+            $owner->id => ['role' => 'admin', 'status' => 'active', 'joined_at' => now()],
+            $member->id => ['role' => 'member', 'status' => 'active', 'joined_at' => now()],
+        ]);
+
+        $this
+            ->actingAs($owner)
+            ->post('/expenses', [
+                'description' => 'Hotel',
+                'amount' => 3000,
+                'expense_date' => now()->toDateString(),
+                'group_id' => $group->id,
+                'paid_by_user_id' => $owner->id,
+                'split_type' => 'equal',
+                'participant_ids' => [$owner->id, $member->id],
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
+        $expense = $group->expenses()->firstOrFail();
+
+        $this
+            ->actingAs($owner)
+            ->post(route('expenses.approve', $expense))
+            ->assertRedirect();
+
+        $this
+            ->actingAs($owner)
+            ->delete(route('groups.destroy', $group))
+            ->assertRedirect(route('groups.index', absolute: false));
+
+        $this->assertSoftDeleted('groups', ['id' => $group->id]);
+
+        $this
+            ->actingAs($member)
+            ->get('/expenses')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Expenses/Index')
+                ->has('expenses', 1)
+                ->where('expenses.0.description', 'Hotel')
+                ->where('expenses.0.group', null)
+            );
+
+        $this
+            ->actingAs($member)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('summary.group_month', 3000)
+                ->where('recentExpenses.0.group', null)
+            );
+    }
 }

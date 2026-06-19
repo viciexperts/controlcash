@@ -6,6 +6,7 @@ const props = defineProps({
     group: Object,
     balances: Object,
     isAdmin: Boolean,
+    isCreator: Boolean,
     users: Array,
 });
 
@@ -35,6 +36,10 @@ const removeMember = (member) => {
     router.delete(route('groups.members.destroy', [props.group.id, member.id]), {
         preserveScroll: true,
     });
+};
+
+const removeGroup = () => {
+    router.delete(route('groups.destroy', props.group.id));
 };
 
 const settle = () => {
@@ -68,9 +73,14 @@ const statusClass = (status) => ({
 
     <AuthenticatedLayout>
         <template #header>
-            <div>
-                <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ group.name }}</h1>
-                <p class="text-sm text-slate-500">{{ group.description || 'Gastos compartidos del grupo.' }}</p>
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">{{ group.name }}</h1>
+                    <p class="text-sm text-slate-500">{{ group.description || 'Gastos compartidos del grupo.' }}</p>
+                </div>
+                <button v-if="isCreator" @click="removeGroup" class="rounded-md border border-red-300 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 dark:border-red-900 dark:hover:bg-red-950">
+                    Borrar grupo
+                </button>
             </div>
         </template>
 

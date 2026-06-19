@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 
 defineProps({ groups: Array });
 
@@ -12,6 +12,12 @@ const form = useForm({
 const submit = () => {
     form.post(route('groups.store'), {
         onSuccess: () => form.reset(),
+    });
+};
+
+const remove = (group) => {
+    router.delete(route('groups.destroy', group.id), {
+        preserveScroll: true,
     });
 };
 </script>
@@ -46,19 +52,28 @@ const submit = () => {
                 <section class="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900 lg:col-span-2">
                     <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Tus grupos</h2>
                     <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                        <Link
+                        <article
                             v-for="group in groups"
                             :key="group.id"
-                            :href="route('groups.show', group.id)"
                             class="rounded-lg border border-slate-200 p-4 transition hover:border-emerald-500 dark:border-slate-800"
                         >
-                            <h3 class="font-semibold text-slate-900 dark:text-white">{{ group.name }}</h3>
-                            <p class="mt-1 text-sm text-slate-500">{{ group.description || 'Sin descripcion' }}</p>
-                            <div class="mt-4 flex gap-3 text-xs text-slate-500">
-                                <span>{{ group.members_count }} miembros</span>
-                                <span>{{ group.expenses_count }} gastos</span>
+                            <Link :href="route('groups.show', group.id)" class="block">
+                                <h3 class="font-semibold text-slate-900 dark:text-white">{{ group.name }}</h3>
+                                <p class="mt-1 text-sm text-slate-500">{{ group.description || 'Sin descripcion' }}</p>
+                                <div class="mt-4 flex gap-3 text-xs text-slate-500">
+                                    <span>{{ group.members_count }} miembros</span>
+                                    <span>{{ group.expenses_count }} gastos</span>
+                                </div>
+                            </Link>
+                            <div v-if="group.is_creator" class="mt-4 border-t border-slate-100 pt-3 dark:border-slate-800">
+                                <button @click="remove(group)" class="text-sm font-semibold text-red-600 hover:text-red-700">
+                                    Borrar grupo
+                                </button>
+                                <p class="mt-1 text-xs text-slate-500">
+                                    Los gastos se conservaran sin mostrar el nombre del grupo.
+                                </p>
                             </div>
-                        </Link>
+                        </article>
                     </div>
                     <p v-if="!groups.length" class="mt-4 text-sm text-slate-500">
                         Crea un grupo para compartir gastos con familia, amigos o roommates.

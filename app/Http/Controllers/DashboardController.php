@@ -52,7 +52,7 @@ class DashboardController extends Controller
                 'amount' => (float) $expense->amount,
                 'expense_date' => $expense->expense_date->format('Y-m-d'),
                 'category' => $expense->category?->name,
-                'group' => $expense->group?->name,
+                'group' => $expense->group && ! $expense->group->trashed() ? $expense->group->name : null,
                 'payer' => $expense->payer?->name,
             ])->values(),
         ]);

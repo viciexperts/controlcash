@@ -47,7 +47,7 @@ class Expense extends Model
 
     public function group(): BelongsTo
     {
-        return $this->belongsTo(ExpenseGroup::class, 'group_id');
+        return $this->belongsTo(ExpenseGroup::class, 'group_id')->withTrashed();
     }
 
     public function category(): BelongsTo

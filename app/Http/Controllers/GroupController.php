@@ -13,12 +13,20 @@ class GroupController extends Controller
 {
     public function index(Request $request)
     {
+        $user = $request->user();
+
         return Inertia::render('Groups/Index', [
-            'groups' => $request->user()
+            'groups' => $user
                 ->groups()
                 ->withCount(['members', 'expenses'])
                 ->orderBy('name')
-                ->get(),
+                ->get()
+                ->map(fn ($group) => [
+                    ...$group->toArray(),
+                    'members_count' => $group->members_count,
+                    'expenses_count' => $group->expenses_count,
+                    'is_creator' => $group->created_by === $user->id,
+                ]),
         ]);
     }
 
@@ -65,6 +73,7 @@ class GroupController extends Controller
                 ->where('users.id', $request->user()->id)
                 ->wherePivot('role', 'admin')
                 ->exists(),
+            'isCreator' => $group->created_by === $request->user()->id,
             'users' => User::query()->orderBy('name')->get(['id', 'name', 'email']),
         ]);
     }
@@ -83,7 +92,7 @@ class GroupController extends Controller
 
     public function destroy(Request $request, ExpenseGroup $group)
     {
-        $this->authorizeAdmin($request, $group);
+        $this->authorizeCreator($request, $group);
         $group->delete();
 
         return redirect()->route('groups.index');
@@ -158,5 +167,10 @@ class GroupController extends Controller
                 ->exists(),
             403,
         );
+    }
+
+    private function authorizeCreator(Request $request, ExpenseGroup $group): void
+    {
+        abort_unless($group->created_by === $request->user()->id, 403);
     }
 }

@@ -439,6 +439,9 @@ class ExpenseController extends Controller
 
     private function serializeExpense(Expense $expense, $user = null): array
     {
+        $visibleGroup = $expense->group && ! $expense->group->trashed()
+            ? $expense->group
+            : null;
         $canApprove = $user && $expense->group
             ? $expense->group
                 ->members()
@@ -461,7 +464,7 @@ class ExpenseController extends Controller
             'can_approve' => $canApprove,
             'approver' => $expense->approver,
             'category' => $expense->category,
-            'group' => $expense->group,
+            'group' => $visibleGroup,
             'payer' => $expense->payer,
             'splits' => $expense->splits->map(fn ($split) => [
                 'id' => $split->id,
