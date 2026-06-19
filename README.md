@@ -66,6 +66,7 @@ AWS_BUCKET=controlcash
 AWS_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
 AWS_USE_PATH_STYLE_ENDPOINT=true
 AWS_VISIBILITY=private
+AWS_THROW=true
 VITE_APP_NAME=ControlCash
 VITE_APP_LOCALE=es
 GOOGLE_CLIENT_ID=
@@ -106,6 +107,7 @@ AWS_BUCKET=controlcash
 AWS_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
 AWS_USE_PATH_STYLE_ENDPOINT=true
 AWS_VISIBILITY=private
+AWS_THROW=true
 ```
 
 No guardes las llaves de R2 en git. Con `AWS_VISIBILITY=private`, ControlCash genera enlaces temporales para ver los recibos desde la app.

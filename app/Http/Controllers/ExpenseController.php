@@ -252,7 +252,7 @@ class ExpenseController extends Controller
         $file = $request->file('receipt');
 
         return [
-            'path' => $file->store('receipts', ReceiptStorage::disk()),
+            'path' => ReceiptStorage::store($file),
             'name' => $file->getClientOriginalName(),
         ];
     }
