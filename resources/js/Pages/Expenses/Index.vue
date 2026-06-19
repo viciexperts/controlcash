@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { computed, watch } from 'vue';
 
 const props = defineProps({
     expenses: Array,
@@ -9,6 +9,7 @@ const props = defineProps({
     groups: Array,
 });
 
+const page = usePage();
 const today = new Date().toISOString().slice(0, 10);
 const form = useForm({
     description: '',
@@ -26,6 +27,25 @@ const form = useForm({
 const selectedGroup = computed(() =>
     props.groups.find((group) => Number(group.id) === Number(form.group_id)),
 );
+const hasGroups = computed(() => props.groups.length > 0);
+
+const selectAllGroupMembers = (group) => {
+    form.participant_ids = group?.members?.map((member) => member.id) || [];
+    form.paid_by_user_id =
+        group?.members?.find((member) => Number(member.id) === Number(page.props.auth.user.id))?.id ||
+        group?.members?.[0]?.id ||
+        '';
+};
+
+watch(selectedGroup, (group) => {
+    if (group) {
+        selectAllGroupMembers(group);
+        return;
+    }
+
+    form.paid_by_user_id = '';
+    form.participant_ids = [];
+});
 
 const money = (value) =>
     new Intl.NumberFormat('es-DO', {
@@ -37,6 +57,8 @@ const submit = () => {
     if (!form.group_id) {
         form.paid_by_user_id = '';
         form.participant_ids = [];
+    } else if (selectedGroup.value && !form.participant_ids.length) {
+        selectAllGroupMembers(selectedGroup.value);
     }
 
     form.post(route('expenses.store'), {
@@ -91,8 +113,9 @@ const remove = (expense) => {
                                     {{ category.name }}
                                 </option>
                             </select>
+                            <p v-if="form.errors.category_id" class="mt-1 text-xs text-red-600">{{ form.errors.category_id }}</p>
                         </label>
-                        <label class="block">
+                        <label v-if="hasGroups" class="block">
                             <span class="text-sm text-slate-600 dark:text-slate-300">Grupo</span>
                             <select v-model="form.group_id" class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-950 dark:text-white">
                                 <option value="">Personal</option>
@@ -100,9 +123,20 @@ const remove = (expense) => {
                                     {{ group.name }}
                                 </option>
                             </select>
+                            <p class="mt-1 text-xs text-slate-500">
+                                Si eliges un grupo, todos sus miembros podran ver el gasto.
+                            </p>
+                            <p v-if="form.errors.group_id" class="mt-1 text-xs text-red-600">{{ form.errors.group_id }}</p>
                         </label>
+                        <div v-else class="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100">
+                            Este gasto sera personal. Para compartir gastos, primero
+                            <Link :href="route('groups.index')" class="font-semibold underline">crea un grupo</Link>.
+                        </div>
 
                         <div v-if="selectedGroup" class="space-y-4 rounded-lg bg-slate-50 p-4 dark:bg-slate-950">
+                            <p class="text-sm text-slate-600 dark:text-slate-300">
+                                Todos los miembros de {{ selectedGroup.name }} podran ver este gasto en su historial y en el detalle del grupo.
+                            </p>
                             <label class="block">
                                 <span class="text-sm text-slate-600 dark:text-slate-300">Pagado por</span>
                                 <select v-model="form.paid_by_user_id" class="mt-1 w-full rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-950 dark:text-white" required>
@@ -111,9 +145,15 @@ const remove = (expense) => {
                                         {{ member.name }}
                                     </option>
                                 </select>
+                                <p v-if="form.errors.paid_by_user_id" class="mt-1 text-xs text-red-600">{{ form.errors.paid_by_user_id }}</p>
                             </label>
                             <div>
-                                <p class="text-sm text-slate-600 dark:text-slate-300">Participantes</p>
+                                <div class="flex items-center justify-between gap-3">
+                                    <p class="text-sm text-slate-600 dark:text-slate-300">Participantes</p>
+                                    <button type="button" class="text-xs font-semibold text-emerald-700 dark:text-emerald-300" @click="selectAllGroupMembers(selectedGroup)">
+                                        Seleccionar todos
+                                    </button>
+                                </div>
                                 <label v-for="member in selectedGroup.members" :key="member.id" class="mt-2 flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
                                     <input v-model="form.participant_ids" type="checkbox" :value="member.id" class="rounded border-slate-300 text-emerald-600" />
                                     {{ member.name }}
@@ -121,6 +161,7 @@ const remove = (expense) => {
                                 <p class="mt-2 text-xs text-slate-500">
                                     Si no marcas participantes, se divide entre todos.
                                 </p>
+                                <p v-if="form.errors.participant_ids" class="mt-1 text-xs text-red-600">{{ form.errors.participant_ids }}</p>
                             </div>
                         </div>
 

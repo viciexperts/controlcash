@@ -7,6 +7,7 @@ use App\Models\Expense;
 use App\Models\ExpenseGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class ExpenseController extends Controller
@@ -111,10 +112,19 @@ class ExpenseController extends Controller
             abort_unless($group->members()->where('users.id', $request->user()->id)->exists(), 403);
 
             $memberIds = $group->members()->pluck('users.id')->all();
-            abort_unless(in_array((int) $data['paid_by_user_id'], $memberIds, true), 422);
+
+            if (empty($data['paid_by_user_id']) || ! in_array((int) $data['paid_by_user_id'], $memberIds, true)) {
+                throw ValidationException::withMessages([
+                    'paid_by_user_id' => __('Selecciona un miembro del grupo como pagador.'),
+                ]);
+            }
 
             foreach ($data['participant_ids'] ?? [] as $participantId) {
-                abort_unless(in_array((int) $participantId, $memberIds, true), 422);
+                if (! in_array((int) $participantId, $memberIds, true)) {
+                    throw ValidationException::withMessages([
+                        'participant_ids' => __('Los participantes deben pertenecer al grupo seleccionado.'),
+                    ]);
+                }
             }
         }
 
