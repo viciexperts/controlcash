@@ -6,7 +6,6 @@ use App\Models\Category;
 use App\Models\Expense;
 use App\Models\ExpenseComment;
 use App\Models\ExpenseGroup;
-use App\Notifications\GroupExpenseCreated;
 use App\Support\ReceiptStorage;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -16,7 +15,6 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Throwable;
 
 class ExpenseController extends Controller
 {
@@ -59,8 +57,6 @@ class ExpenseController extends Controller
 
             return $expense;
         });
-
-        $this->notifyGroupMembers($expense, $request);
 
         return back();
     }
@@ -256,26 +252,6 @@ class ExpenseController extends Controller
             'path' => ReceiptStorage::store($file),
             'name' => $file->getClientOriginalName(),
         ];
-    }
-
-    private function notifyGroupMembers(Expense $expense, Request $request): void
-    {
-        if (empty($expense->group_id)) {
-            return;
-        }
-
-        $expense->loadMissing(['group.members', 'owner', 'payer', 'category']);
-
-        $expense->group
-            ->members
-            ->reject(fn ($member) => $member->id === $request->user()->id)
-            ->each(function ($member) use ($expense) {
-                try {
-                    $member->notify(new GroupExpenseCreated($expense));
-                } catch (Throwable $exception) {
-                    report($exception);
-                }
-            });
     }
 
     private function syncSplits(Expense $expense, array $data): void

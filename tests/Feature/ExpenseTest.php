@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Category;
 use App\Models\ExpenseGroup;
 use App\Models\User;
-use App\Notifications\GroupExpenseCreated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
@@ -53,8 +52,7 @@ class ExpenseTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertRedirect();
 
-        Notification::assertSentTo($member, GroupExpenseCreated::class);
-        Notification::assertNotSentTo($owner, GroupExpenseCreated::class);
+        Notification::assertNothingSent();
 
         $this
             ->actingAs($member)
