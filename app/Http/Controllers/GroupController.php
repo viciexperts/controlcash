@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\ExpenseGroup;
+use App\Models\GroupInvitation;
 use App\Models\Settlement;
 use App\Models\User;
+use App\Notifications\GroupInvitationCreated;
 use App\Support\GroupBalances;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 
 class GroupController extends Controller
@@ -103,10 +106,28 @@ class GroupController extends Controller
         $this->authorizeAdmin($request, $group);
 
         $data = $request->validate([
-            'email' => ['required', 'email', 'exists:users,email'],
+            'email' => ['required', 'email'],
         ]);
 
-        $user = User::where('email', $data['email'])->firstOrFail();
+        $email = strtolower($data['email']);
+        $user = User::where('email', $email)->first();
+
+        if (! $user) {
+            $invitation = GroupInvitation::updateOrCreate(
+                [
+                    'group_id' => $group->id,
+                    'email' => $email,
+                ],
+                [
+                    'invited_by' => $request->user()->id,
+                    'accepted_at' => null,
+                ],
+            );
+
+            Notification::route('mail', $email)->notify(new GroupInvitationCreated($invitation));
+
+            return back();
+        }
 
         if (! $group->members()->where('users.id', $user->id)->exists()) {
             $group->members()->attach($user->id, [

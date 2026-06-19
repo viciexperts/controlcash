@@ -88,9 +88,15 @@ const statusClass = (status) => ({
             <div class="grid gap-6 lg:grid-cols-3">
                 <section class="rounded-lg bg-white p-5 shadow-sm dark:bg-slate-900">
                     <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Miembros</h2>
-                    <form @submit.prevent="addMember" class="mt-4 flex gap-2">
-                        <input v-model="memberForm.email" type="email" placeholder="correo@ejemplo.com" class="min-w-0 flex-1 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-950 dark:text-white" required />
-                        <button class="rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">Agregar</button>
+                    <form @submit.prevent="addMember" class="mt-4">
+                        <div class="flex gap-2">
+                            <input v-model="memberForm.email" type="email" inputmode="email" placeholder="correo@servidor.com" class="min-w-0 flex-1 rounded-md border-slate-300 dark:border-slate-700 dark:bg-slate-950 dark:text-white" required />
+                            <button class="rounded-md bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">Agregar</button>
+                        </div>
+                        <p v-if="memberForm.errors.email" class="mt-1 text-xs text-red-600">{{ memberForm.errors.email }}</p>
+                        <p class="mt-2 text-xs text-slate-500">
+                            Si la persona no tiene cuenta, le enviaremos una invitacion por correo.
+                        </p>
                     </form>
                     <div class="mt-4 space-y-3">
                         <div v-for="member in group.members" :key="member.id" class="flex items-center justify-between rounded-md bg-slate-50 p-3 dark:bg-slate-950">

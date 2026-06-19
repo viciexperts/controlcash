@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Support\DefaultCategories;
+use App\Support\PendingGroupInvitations;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
@@ -35,6 +36,7 @@ class GoogleAuthController extends Controller
         $user->save();
 
         DefaultCategories::ensureFor($user);
+        PendingGroupInvitations::acceptFor($user);
 
         Auth::login($user, remember: true);
 

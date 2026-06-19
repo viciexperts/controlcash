@@ -47,4 +47,9 @@ class ExpenseGroup extends Model
     {
         return $this->hasMany(Settlement::class, 'group_id');
     }
+
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(GroupInvitation::class, 'group_id');
+    }
 }
