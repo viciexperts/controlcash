@@ -61,11 +61,25 @@ GOOGLE_REDIRECT_URI=https://controlcash.itcontinental.com/auth/google/callback
 
 Genera `APP_KEY` localmente con `php artisan key:generate --show` y pega el valor en Render.
 
-Para conservar SQLite entre deploys, agrega un persistent disk en Render montado en:
+### Persistencia de datos en Render
+
+Render reemplaza el filesystem del contenedor en cada deploy. Si no agregas un Persistent Disk, la base SQLite se vuelve efimera y los datos pueden perderse cuando subes cambios.
+
+Para conservar SQLite entre deploys, agrega un Persistent Disk en el servicio de Render:
 
 ```txt
-/var/www/html/storage
+Name: controlcash-storage
+Mount path: /var/www/html/storage
+Size: 1 GB o mas
 ```
+
+Con ese mount path, esta variable debe quedar asi:
+
+```env
+DB_DATABASE=/var/www/html/storage/database.sqlite
+```
+
+Ese mismo disco tambien conserva archivos subidos a `storage`, como recibos.
 
 ## Google OAuth
 
