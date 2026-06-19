@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
+import MotivationalQuoteOverlay from '@/Components/MotivationalQuoteOverlay.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
@@ -20,6 +21,8 @@ const links = [
 
 <template>
     <div class="min-h-screen bg-slate-100 dark:bg-slate-950">
+        <MotivationalQuoteOverlay />
+
         <nav class="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 justify-between">
