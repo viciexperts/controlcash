@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class ExpenseController extends Controller
 {
@@ -268,7 +269,13 @@ class ExpenseController extends Controller
         $expense->group
             ->members
             ->reject(fn ($member) => $member->id === $request->user()->id)
-            ->each(fn ($member) => $member->notify(new GroupExpenseCreated($expense)));
+            ->each(function ($member) use ($expense) {
+                try {
+                    $member->notify(new GroupExpenseCreated($expense));
+                } catch (Throwable $exception) {
+                    report($exception);
+                }
+            });
     }
 
     private function syncSplits(Expense $expense, array $data): void
