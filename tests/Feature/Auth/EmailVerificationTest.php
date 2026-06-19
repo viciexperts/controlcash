@@ -32,6 +32,18 @@ class EmailVerificationTest extends TestCase
             ->assertRedirect(route('verification.notice', absolute: false));
     }
 
+    public function test_google_users_do_not_need_email_verification_notice(): void
+    {
+        $user = User::factory()->unverified()->create([
+            'google_id' => 'google-123',
+        ]);
+
+        $this
+            ->actingAs($user)
+            ->get('/expenses')
+            ->assertOk();
+    }
+
     public function test_email_can_be_verified(): void
     {
         $user = User::factory()->unverified()->create();

@@ -51,6 +51,11 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    public function hasVerifiedEmail(): bool
+    {
+        return parent::hasVerifiedEmail() || filled($this->google_id);
+    }
+
     public function categories(): HasMany
     {
         return $this->hasMany(Category::class);
