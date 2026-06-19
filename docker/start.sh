@@ -4,7 +4,7 @@ set -e
 cd /var/www/html
 
 if [ -z "${APP_KEY:-}" ]; then
-  php artisan key:generate --force --no-interaction
+  export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
 fi
 
 if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
