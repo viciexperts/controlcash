@@ -29,17 +29,14 @@ WORKDIR /var/www/html
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        git \
-        unzip \
         libzip-dev \
         libonig-dev \
-        sqlite3 \
-        libsqlite3-dev \
+        libpq-dev \
     && docker-php-ext-install \
         bcmath \
         mbstring \
         pdo \
-        pdo_sqlite \
+        pdo_pgsql \
         zip \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
@@ -61,8 +58,8 @@ RUN composer dump-autoload --optimize \
 ENV APP_ENV=production
 ENV APP_DEBUG=false
 ENV LOG_CHANNEL=stderr
-ENV DB_CONNECTION=sqlite
-ENV DB_DATABASE=/var/data/controlcash/database.sqlite
+ENV DB_CONNECTION=pgsql
+ENV DB_SSLMODE=require
 
 EXPOSE 80
 

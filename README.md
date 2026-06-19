@@ -47,8 +47,13 @@ APP_LOCALE=es
 APP_FALLBACK_LOCALE=en
 APP_FAKER_LOCALE=es_ES
 LOG_CHANNEL=stderr
-DB_CONNECTION=sqlite
-DB_DATABASE=/var/data/controlcash/database.sqlite
+DB_CONNECTION=pgsql
+DB_HOST=ep-quiet-butterfly-adlxn8a6-pooler.c-2.us-east-1.aws.neon.tech
+DB_PORT=5432
+DB_DATABASE=neondb
+DB_USERNAME=neondb_owner
+DB_PASSWORD=
+DB_SSLMODE=require
 SESSION_DRIVER=database
 CACHE_STORE=database
 QUEUE_CONNECTION=database
@@ -61,25 +66,30 @@ GOOGLE_REDIRECT_URI=https://controlcash.itcontinental.com/auth/google/callback
 
 Genera `APP_KEY` localmente con `php artisan key:generate --show` y pega el valor en Render.
 
-### Persistencia de datos en Render
+### Base de datos persistente en Render
 
-Render reemplaza el filesystem del contenedor en cada deploy. Si no agregas un Persistent Disk, la base SQLite se vuelve efimera y los datos pueden perderse cuando subes cambios.
+Usa Neon Postgres para que la base viva fuera del contenedor de Render. Asi los datos no se borran cuando haces deploy o subes commits.
 
-Para conservar SQLite entre deploys, agrega un Persistent Disk en el servicio de Render:
-
-```txt
-Name: controlcash-storage
-Mount path: /var/data
-Size: 1 GB o mas
-```
-
-Con ese mount path, esta variable debe quedar asi:
+Variables necesarias en Render:
 
 ```env
-DB_DATABASE=/var/data/controlcash/database.sqlite
+DB_CONNECTION=pgsql
+DB_HOST=ep-quiet-butterfly-adlxn8a6-pooler.c-2.us-east-1.aws.neon.tech
+DB_PORT=5432
+DB_DATABASE=neondb
+DB_USERNAME=neondb_owner
+DB_PASSWORD=tu_password_de_neon
+DB_SSLMODE=require
 ```
 
-Si `DB_DATABASE` apunta a `/var/www/html/...` o a cualquier ruta que no este dentro del Persistent Disk, la base de datos se perdera en cada deploy.
+No guardes `DB_PASSWORD` en git. Configuralo solo como Environment Variable en Render.
+
+SQLite queda disponible para desarrollo local. Si decides usar SQLite en Render, tendrias que montar un Persistent Disk y apuntar `DB_DATABASE` dentro de ese disco:
+
+```env
+DB_CONNECTION=sqlite
+DB_DATABASE=/var/data/controlcash/database.sqlite
+```
 
 ## Google OAuth
 
