@@ -21,4 +21,8 @@ export default {
         add: 'Agregar',
         settle: 'Saldar',
     },
+    status: {
+        processing: 'Procesando',
+        processing_detail: 'Estamos guardando los cambios.',
+    },
 };
