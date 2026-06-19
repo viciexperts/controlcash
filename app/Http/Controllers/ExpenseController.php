@@ -7,11 +7,11 @@ use App\Models\Expense;
 use App\Models\ExpenseComment;
 use App\Models\ExpenseGroup;
 use App\Notifications\GroupExpenseCreated;
+use App\Support\ReceiptStorage;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -252,7 +252,7 @@ class ExpenseController extends Controller
         $file = $request->file('receipt');
 
         return [
-            'path' => $file->store('receipts', 'public'),
+            'path' => $file->store('receipts', ReceiptStorage::disk()),
             'name' => $file->getClientOriginalName(),
         ];
     }
@@ -456,7 +456,7 @@ class ExpenseController extends Controller
             'amount' => (float) $expense->amount,
             'expense_date' => $expense->expense_date->format('Y-m-d'),
             'notes' => $expense->notes,
-            'receipt_url' => $expense->receipt_path ? Storage::disk('public')->url($expense->receipt_path) : null,
+            'receipt_url' => ReceiptStorage::url($expense),
             'receipt_original_name' => $expense->receipt_original_name,
             'is_recurring' => $expense->is_recurring,
             'recurring_day' => $expense->recurring_day,

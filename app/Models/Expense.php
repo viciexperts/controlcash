@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\ReceiptStorage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,6 +11,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Expense extends Model
 {
     use HasFactory;
+
+    protected $appends = [
+        'receipt_url',
+    ];
 
     protected $fillable = [
         'user_id',
@@ -78,5 +83,10 @@ class Expense extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(ExpenseComment::class);
+    }
+
+    public function getReceiptUrlAttribute(): ?string
+    {
+        return ReceiptStorage::url($this);
     }
 }

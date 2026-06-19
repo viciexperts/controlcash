@@ -168,7 +168,7 @@ const statusClass = (status) => ({
                                     </span>
                                 </div>
                                 <p class="text-sm text-slate-500">{{ expense.category?.name || 'Sin categoria' }}</p>
-                                <a v-if="expense.receipt_path" :href="`/storage/${expense.receipt_path}`" target="_blank" class="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                                <a v-if="expense.receipt_url" :href="expense.receipt_url" target="_blank" class="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                                     Ver recibo
                                 </a>
                             </div>

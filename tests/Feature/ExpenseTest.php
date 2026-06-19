@@ -7,7 +7,9 @@ use App\Models\ExpenseGroup;
 use App\Models\User;
 use App\Notifications\GroupExpenseCreated;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -64,6 +66,38 @@ class ExpenseTest extends TestCase
                 ->where('expenses.0.description', 'Cena compartida')
                 ->where('expenses.0.group.name', 'Apartamento')
             );
+    }
+
+    public function test_receipts_are_stored_on_configured_disk(): void
+    {
+        Storage::fake('s3');
+        config(['filesystems.receipts_disk' => 's3']);
+
+        $user = User::factory()->create();
+        $category = Category::create([
+            'user_id' => $user->id,
+            'name' => 'Compras',
+            'color' => '#10b981',
+            'icon' => 'shopping-bag',
+        ]);
+
+        $this
+            ->actingAs($user)
+            ->post('/expenses', [
+                'description' => 'Supermercado',
+                'amount' => 850,
+                'expense_date' => now()->toDateString(),
+                'category_id' => $category->id,
+                'split_type' => 'equal',
+                'receipt' => UploadedFile::fake()->create('recibo.pdf', 12, 'application/pdf'),
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect();
+
+        $expense = $user->expenses()->firstOrFail();
+
+        Storage::disk('s3')->assertExists($expense->receipt_path);
+        $this->assertSame('recibo.pdf', $expense->receipt_original_name);
     }
 
     public function test_expense_workflow_supports_recurrence_comments_approval_and_csv_export(): void

@@ -57,6 +57,15 @@ DB_SSLMODE=require
 SESSION_DRIVER=database
 CACHE_STORE=database
 QUEUE_CONNECTION=database
+FILESYSTEM_DISK=local
+RECEIPT_FILESYSTEM_DISK=s3
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=auto
+AWS_BUCKET=controlcash
+AWS_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+AWS_USE_PATH_STYLE_ENDPOINT=true
+AWS_VISIBILITY=private
 VITE_APP_NAME=ControlCash
 VITE_APP_LOCALE=es
 GOOGLE_CLIENT_ID=
@@ -83,6 +92,23 @@ DB_SSLMODE=require
 ```
 
 No guardes `DB_PASSWORD` en git. Configuralo solo como Environment Variable en Render.
+
+### Recibos en Cloudflare R2
+
+Los archivos de recibos usan el disco `RECEIPT_FILESYSTEM_DISK`. Para guardar recibos en R2, configura estas variables en Render:
+
+```env
+RECEIPT_FILESYSTEM_DISK=s3
+AWS_ACCESS_KEY_ID=tu_access_key_id_de_r2
+AWS_SECRET_ACCESS_KEY=tu_secret_access_key_de_r2
+AWS_DEFAULT_REGION=auto
+AWS_BUCKET=controlcash
+AWS_ENDPOINT=https://<account-id>.r2.cloudflarestorage.com
+AWS_USE_PATH_STYLE_ENDPOINT=true
+AWS_VISIBILITY=private
+```
+
+No guardes las llaves de R2 en git. Con `AWS_VISIBILITY=private`, ControlCash genera enlaces temporales para ver los recibos desde la app.
 
 SQLite queda disponible para desarrollo local. Si decides usar SQLite en Render, tendrias que montar un Persistent Disk y apuntar `DB_DATABASE` dentro de ese disco:
 
