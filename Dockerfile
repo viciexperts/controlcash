@@ -1,3 +1,15 @@
+FROM composer:2 AS vendor
+
+WORKDIR /app
+
+COPY composer.json composer.lock ./
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --prefer-dist \
+    --no-scripts \
+    --optimize-autoloader
+
 FROM node:24-alpine AS frontend
 
 WORKDIR /app
@@ -5,6 +17,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 
+COPY --from=vendor /app/vendor ./vendor
 COPY resources ./resources
 COPY vite.config.js postcss.config.js tailwind.config.js ./
 COPY public ./public
@@ -33,15 +46,8 @@ RUN apt-get update \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-COPY composer.json composer.lock ./
-RUN composer install \
-    --no-dev \
-    --no-interaction \
-    --prefer-dist \
-    --no-scripts \
-    --optimize-autoloader
-
 COPY . .
+COPY --from=vendor /app/vendor ./vendor
 COPY --from=frontend /app/public/build ./public/build
 COPY docker/start.sh /usr/local/bin/start-controlcash
 
