@@ -48,7 +48,7 @@ APP_FALLBACK_LOCALE=en
 APP_FAKER_LOCALE=es_ES
 LOG_CHANNEL=stderr
 DB_CONNECTION=sqlite
-DB_DATABASE=/var/www/html/storage/database.sqlite
+DB_DATABASE=/var/data/controlcash/database.sqlite
 SESSION_DRIVER=database
 CACHE_STORE=database
 QUEUE_CONNECTION=database
@@ -69,17 +69,17 @@ Para conservar SQLite entre deploys, agrega un Persistent Disk en el servicio de
 
 ```txt
 Name: controlcash-storage
-Mount path: /var/www/html/storage
+Mount path: /var/data
 Size: 1 GB o mas
 ```
 
 Con ese mount path, esta variable debe quedar asi:
 
 ```env
-DB_DATABASE=/var/www/html/storage/database.sqlite
+DB_DATABASE=/var/data/controlcash/database.sqlite
 ```
 
-Ese mismo disco tambien conserva archivos subidos a `storage`, como recibos.
+Si `DB_DATABASE` apunta a `/var/www/html/...` o a cualquier ruta que no este dentro del Persistent Disk, la base de datos se perdera en cada deploy.
 
 ## Google OAuth
 

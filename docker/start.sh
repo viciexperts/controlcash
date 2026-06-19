@@ -8,9 +8,11 @@ if [ -z "${APP_KEY:-}" ]; then
 fi
 
 if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
+  export DB_DATABASE="${DB_DATABASE:-/var/data/controlcash/database.sqlite}"
   mkdir -p storage/app storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/testing storage/framework/views storage/logs
   mkdir -p "$(dirname "${DB_DATABASE}")"
   touch "${DB_DATABASE}"
+  chown -R www-data:www-data "$(dirname "${DB_DATABASE}")"
 fi
 
 chown -R www-data:www-data storage bootstrap/cache

@@ -62,7 +62,7 @@ ENV APP_ENV=production
 ENV APP_DEBUG=false
 ENV LOG_CHANNEL=stderr
 ENV DB_CONNECTION=sqlite
-ENV DB_DATABASE=/var/www/html/storage/database.sqlite
+ENV DB_DATABASE=/var/data/controlcash/database.sqlite
 
 EXPOSE 80
 
